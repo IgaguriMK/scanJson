@@ -1,16 +1,20 @@
 package main
 
 import (
+	"compress/gzip"
 	"encoding/json"
 	"flag"
 	"fmt"
+	"io"
 	"os"
 
-	"github.com/IgaguriMK/scanJson/ioutil"
 	"github.com/IgaguriMK/scanJson/scanner"
 )
 
 func main() {
+	var useGzip bool
+	flag.BoolVar(&useGzip, "d", false, "Decompress gzip.")
+
 	flag.Parse()
 
 	args := flag.Args()
@@ -29,7 +33,19 @@ func main() {
 	}
 	defer f.Close()
 
-	dec := json.NewDecoder(f)
+	var r io.Reader = f
+
+	if useGzip {
+		gr, err := gzip.NewReader(r)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, "Error: Can't open as gzipped file: ", err)
+			os.Exit(1)
+		}
+		defer gr.Close()
+		r = gr
+	}
+
+	dec := json.NewDecoder(r)
 
 	value, err := scanner.ParseValue(dec)
 	if err != nil {

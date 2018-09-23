@@ -276,15 +276,27 @@ func mergeValue(x, y *Value) *Value {
 		}
 	}
 
-	for k, v := range x.Variables {
-		z.Variables[k] = v
+	keys := make([]string, 0)
+	for k := range x.Variables {
+		keys = append(keys, k)
+	}
+	for k := range y.Variables {
+		keys = append(keys, k)
 	}
 
-	for k, v := range y.Variables {
-		if old, ok := z.Variables[k]; ok {
-			z.Variables[k] = mergeValue(old, v)
-		} else {
-			z.Variables[k] = v
+	for _, k := range keys {
+		xval, xok := x.Variables[k]
+		yval, yok := y.Variables[k]
+
+		switch {
+		case xok && yok:
+			z.Variables[k] = mergeValue(xval, yval)
+		case xok:
+			z.Variables[k] = xval
+			z.Variables[k].IsNullable = true
+		case yok:
+			z.Variables[k] = yval
+			z.Variables[k].IsNullable = true
 		}
 	}
 
