@@ -14,3 +14,7 @@
 # artifacts
 jscan
 
+# test data
+*.json
+*.txt
+*.schema
