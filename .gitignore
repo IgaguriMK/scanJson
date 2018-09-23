@@ -12,7 +12,7 @@
 *.out
 
 # artifacts
-jscan
+/jscan
 
 # test data
 *.json
